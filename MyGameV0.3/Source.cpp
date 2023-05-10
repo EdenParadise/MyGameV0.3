@@ -197,14 +197,6 @@ public:
 		}
 	}
 
-	//Deletes all the information from inventory array and recreates it
-	void CreateNewArray()
-	{
-		int *InventoryArray = new int[this->GetStr()];
-
-	}
-
-
 
 	//Destructor
 	~Humanoid()
@@ -454,43 +446,6 @@ void UnEquipItem(Humanoid& entity, Equipment& object)
 
 int main()
 {
-	Humanoid Eden("eden", 1);
-	Equipment Axe("Battle axe", 0, 6, 5, 3);
-	Equipment Shield("Shield", 8, 0, 4, 5);
-
-	Eden.PrintInventoryArray();
-	cout << endl;
-	Eden.PrintInfo();
-
-	EquipItem(Eden, Axe);
-	
-	cout << endl;
-
-	Eden.PrintInventoryArray();
-	cout << endl;
-	Eden.PrintInfo();
-
-	cout << endl;
-
-	EquipItem(Eden, Shield);
-
-	Eden.PrintInventoryArray();
-	cout << endl;
-	Eden.PrintInfo();
-	
-	UnEquipItem(Eden, Axe);
-	cout << endl;
-
-	Eden.PrintInventoryArray();
-	cout << endl;
-	Eden.PrintInfo();
-	
-	UnEquipItem(Eden, Shield);
-	cout << endl;
-
-	Eden.PrintInventoryArray();
-	cout << endl;
-	Eden.PrintInfo();
 
 	
 	return 0;
