@@ -24,6 +24,7 @@ public:
 		InventoryArray[str];
 		FillWithNull();
 	}	   
+
 	//Name and class choice creation (FOR PLAYER ONLY)
 	Humanoid(string name, int choice)
 	{
@@ -73,6 +74,7 @@ public:
 			break;
 		}
 	}		
+
 	//Default, just creates knight
 	Humanoid()
 	{
@@ -145,24 +147,48 @@ public:
 
 	//Methods
 		
+
+
 	//Print humanoid info to console
 	void PrintInfo()
 	{
-		cout << GetName() << " " << GetClassName() << " " << GetLvl()<<endl;
+		cout << GetName() << " " << GetClassName() << " lvl: " << GetLvl()<<endl;
 		cout << "Hp: " << GetHp() << endl;
 		cout << "Dmg: " << GetDmg() << endl << endl;
 		cout << "Inventory: " << invspace << " of " << GetStr() << endl;
 	}
 	
 	//Leveling up, +HP, +DMG, +LVL, +STR
+	void LevelUp(int value)
+	{
+		for (int i = 0; i < value; i++)
+		{
+			lvl++;
+			hp += 8 + lvl;
+			dmg += 3 + lvl;
+			lvl % 2 ? str = str : str++;
+		}
+	}
+
+	//Leveling up without value (annding more than one level)
 	void LevelUp()
 	{
 		lvl++;
 		hp += 8 + lvl;
-		dmg += 4 + lvl;
+		dmg += 3 + lvl;
 		lvl % 2 ? str = str : str++;
+		if (lvl % 2)
+		{
+			str = str;
+		}
+		else
+		{
+			str++;
+			this->InventoryArray[str] = 0;
+		}
 	}
 
+	//Print inventory cells
 	void PrintInventoryArray()
 	{
 		for (int i = 0; i < str; i++)
@@ -171,7 +197,16 @@ public:
 		}
 	}
 
-	//destructor
+	//Deletes all the information from inventory array and recreates it
+	void CreateNewArray()
+	{
+		int *InventoryArray = new int[this->GetStr()];
+
+	}
+
+
+
+	//Destructor
 	~Humanoid()
 	{
 		delete[]InventoryArray;
@@ -179,26 +214,37 @@ public:
 
 	
 private:
+
+	//Use ONLY to fill every Inventory cell with 0 (Clear inventory)
 	void FillWithNull()
 	{
-		for (int i = 0; i < str; i++)
+		for (int i = 0; i < 100; i++)
 		{
 			InventoryArray[i] = 0;
 		}
 	}
 
+	//Counting objects
 	int static count;
-	string classname = " ";
-	string name = " ";
-	int lvl = 0;
-	int hp = 0;
-	int dmg = 0;
-	int str = 0;			//strength
-	int invspace = 0;
 
+	string classname = " ";	//classname
+	string name = " ";		//name
+	int lvl = 0;			//humanoid level
+	int hp = 0;				//humanoid hp
+	int dmg = 0;			//humanoid damage
+	int str = 0;			//strength
+	int invspace = 0;		//how much cells is filled
+
+	//Use Print eqpitems as friend function
 	friend void PrintEquippedItems(Humanoid& entity);
+
+	//Use equipitem as friend function
 	friend void EquipItem(Humanoid& entity, Equipment& object);
 
+	//Unequip item friend function 
+	friend void UnEquipItem(Humanoid& entity, Equipment& object);
+
+	//Object id. Every object gets and id that==count of created objects
 	int id = 0;	
 	int* InventoryArray = new int[100];
 };
@@ -291,52 +337,64 @@ public:
 	}
 	
 private:
-	string name = " ";
-	int BonusHp;
-	int BonusDmg;
-	int Weight;
-	int Space;
-	int id;
-	bool EqpStatus;
+	string name = " ";	//Object name
+	int BonusHp;		//Object bonus hp
+	int BonusDmg;		//Object bonus dmg
+	int Weight;			//Object weight
+	int Space;			//Object space fill
+	int id;				//Object id. Every object gets and id that==count of created objects
+	bool EqpStatus;		//Object is equipped?
 
+	//Counting objects
 	static int count;
 
+	//Use Print eqpitems as friend function
 	friend void PrintEquippedItems(Humanoid& entity);
+
+	//Use equipitem as friend function
 	friend void EquipItem(Humanoid& entity, Equipment& object);
 	
 	
-
+	//class Humanoid is friendly to Equipment, class Humanoid can freely use Equipment parameters
 	friend Humanoid;
 };
 
+//create array of Pointers to objects of Equipment class
 static Equipment* arragorn[20];
 
+//Default initialization to Equipment::count = 0;
 int Equipment::count = 0;
 
-
+//Function to equip item to entity
 void EquipItem(Humanoid& entity, Equipment& object)
-{
+{			//if weight of object less than entity strenght, or object space less than free inventory space, or object is equipped, than object cannot be equipped
 	if ((object.Weight <= entity.str) && (object.Space <= (entity.str - entity.invspace))&&object.EqpStatus==false)
 	{
-			int checkSpace = 0;
+			int checkSpace = 0;		//we create chackSpace to control filling of inventory cells
 			for (int j = 0; j < entity.str+1; j++)
 			{
-				if(entity.InventoryArray[j]==0)
+				if(entity.InventoryArray[j]==0)		//check if cell is empty
 				{
-					entity.InventoryArray[j] = object.id;
-					checkSpace++;
+					entity.InventoryArray[j] = object.id;		//if cell is empty, than we initialize cell with object id
+					checkSpace++;								//checkspace++ means that cell was initialized with object id and we can move forward
 				}
-				if (checkSpace == object.Space)
+				if (checkSpace == object.Space)					//when checkspace equals object.Space, we stop initializing inventory cells
 				{
 					break;
 				}
 			}
-		object.EqpStatus = true;
-		entity.invspace += object.Space;
+		object.EqpStatus = true;				//Object status changes to "Equipped"
+		entity.invspace += object.Space;		//We andd object.space to entity.invspace to indicate that inventory is filled with this object
 		
-		entity.SetDmg(entity.GetDmg()+object.GetBonusDmg());
-		entity.SetHp(entity.GetHp() + object.GetBonusHp());
-		arragorn[object.GetId()] = &object;
+		entity.SetDmg(entity.GetDmg()+object.GetBonusDmg());		//Adding bonus dmg to entity dmg
+		entity.SetHp(entity.GetHp() + object.GetBonusHp());			//Adding bonus hp to entity hp
+		arragorn[object.GetId()] = &object;				//We add object to equipped objects array named arragorn by id
+	}
+
+	//If something went wrong: 
+	else if (object.EqpStatus != false)
+	{
+		cout << endl << "Object cannot be equipped!" << endl << endl;
 	}
 	else if(object.Weight > entity.str)
 	{
@@ -346,12 +404,10 @@ void EquipItem(Humanoid& entity, Equipment& object)
 	{
 		cout << endl << "Not enough inventory space to equip!" << endl << endl;
 	}
-	else if (object.EqpStatus != false)
-	{
-		cout << endl << "Object cannot be equipped!" << endl << endl;
-	}
+	
 }
 
+//Print all equipped objects
 void PrintEquippedItems(Humanoid& entity)
 {
 	for (int i = 1; i <= Equipment::count; i++)
@@ -369,8 +425,73 @@ void PrintEquippedItems(Humanoid& entity)
 	}
 }
 
+void UnEquipItem(Humanoid& entity, Equipment& object)
+{
+	if (object.GetEqpStatus() == 1)
+	{
+		for (int i = 0; i < entity.GetStr(); i++)
+		{
+			if (entity.InventoryArray[i] == object.GetId())
+			{
+				entity.InventoryArray[i] = 0;
+			}
+		}
+
+		object.SetEqpStatus(false);
+
+		entity.SetDmg(entity.GetDmg() - object.GetBonusDmg());
+		entity.SetHp(entity.GetHp() - object.GetBonusHp());
+
+		entity.invspace = (entity.invspace - object.GetSpace());
+
+		arragorn[object.GetId()] = 0;
+	}
+	else
+	{
+		cout << "Object is already unequipped!" << endl;
+	}
+}
+
 int main()
 {
+	Humanoid Eden("eden", 1);
+	Equipment Axe("Battle axe", 0, 6, 5, 3);
+	Equipment Shield("Shield", 8, 0, 4, 5);
+
+	Eden.PrintInventoryArray();
+	cout << endl;
+	Eden.PrintInfo();
+
+	EquipItem(Eden, Axe);
+	
+	cout << endl;
+
+	Eden.PrintInventoryArray();
+	cout << endl;
+	Eden.PrintInfo();
+
+	cout << endl;
+
+	EquipItem(Eden, Shield);
+
+	Eden.PrintInventoryArray();
+	cout << endl;
+	Eden.PrintInfo();
+	
+	UnEquipItem(Eden, Axe);
+	cout << endl;
+
+	Eden.PrintInventoryArray();
+	cout << endl;
+	Eden.PrintInfo();
+	
+	UnEquipItem(Eden, Shield);
+	cout << endl;
+
+	Eden.PrintInventoryArray();
+	cout << endl;
+	Eden.PrintInfo();
+
 	
 	return 0;
 }
